@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.env
+
+# Node
+node_modules/
+.next/
+.turbo/
+
+# Datos locales
+uploads/
+chroma_db/
+*.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Claude
+.claude/
+CLAUDE.md
+
+# Cursor
+.cursor/
+
+# OS
+.DS_Store
