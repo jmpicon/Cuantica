@@ -1,16 +1,23 @@
+import bcrypt as _bcrypt
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from jose import jwt
-from passlib.context import CryptContext
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.user import User
 from pydantic import BaseModel
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def _hash(password: str) -> str:
+    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt()).decode()
+
+
+def _verify(password: str, hashed: str) -> bool:
+    return _bcrypt.checkpw(password.encode(), hashed.encode())
 
 
 class UserCreate(BaseModel):
@@ -36,7 +43,7 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     user = User(
         email=user_in.email,
         username=user_in.username,
-        hashed_password=pwd_context.hash(user_in.password),
+        hashed_password=_hash(user_in.password),
     )
     db.add(user)
     db.commit()
@@ -47,7 +54,7 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form.username).first()
-    if not user or not pwd_context.verify(form.password, user.hashed_password):
+    if not user or not _verify(form.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
     token = create_access_token({"sub": str(user.id), "email": user.email})
     return {"access_token": token, "token_type": "bearer"}

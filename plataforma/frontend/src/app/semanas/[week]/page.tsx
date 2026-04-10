@@ -729,8 +729,9 @@ function getSemanaData(num: number): SemanaData {
   };
 }
 
-export default function SemanaPage({ params }: { params: { week: string } }) {
-  const num = parseInt(params.week, 10);
+export default async function SemanaPage({ params }: { params: Promise<{ week: string }> }) {
+  const { week } = await params;
+  const num = parseInt(week, 10);
 
   if (isNaN(num) || num < 1 || num > 12) {
     return (

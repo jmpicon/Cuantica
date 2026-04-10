@@ -5,7 +5,6 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Añade el token JWT a cada petición si está en localStorage
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
@@ -44,6 +43,25 @@ export const docsApi = {
   },
   remove: (userId: number, docId: number) =>
     api.delete(`/documents/${userId}/${docId}`),
+  query: (userId: number, docId: number, pregunta: string) =>
+    api.post(`/documents/${userId}/${docId}/query`, { pregunta }),
+};
+
+// ── Podcasts ──────────────────────────────────────────────────────────────────
+export const podcastsApi = {
+  list: (userId: number) => api.get(`/podcasts/${userId}`),
+  generate: (
+    userId: number,
+    payload: {
+      titulo: string;
+      documento_id?: number;
+      tema?: string;
+      estilo: string;
+      duracion_minutos: number;
+    }
+  ) => api.post(`/podcasts/${userId}/generate`, payload),
+  remove: (userId: number, podcastId: number) =>
+    api.delete(`/podcasts/${userId}/${podcastId}`),
 };
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
